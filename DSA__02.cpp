@@ -3,210 +3,220 @@
 #include <stack>
 using namespace std;
 
-class Node
+class node
 {
-public:
-    Node *left;
     int data;
-    Node *right;
-    
-    Node(int d)
+    node*left,*right;
+public:
+    node(int k)
     {
-        left = NULL;
-        data = d;
-        right = NULL;
+        data=k;
+        left=right=nullptr;
     }
+
+    friend class BT;
 };
 
-Node* makeTree(Node *root)
+class BT
 {
-    cout<<" Enter data for node (-1 indicates for no data): ";
-    int d;
-    cin>>d;
-    root = new Node(d);
     
-    if(d == -1)
-        return NULL;
-    
-    cout<<"Enter data to the left of "<<d;
-    root->left = makeTree(root->left);
-    cout<<"Enter data to the right of "<<d;
-    root->right = makeTree(root->right);
-    return root;
-}
-
-void SwapNode(Node *root)
-{
-    if(root)
+public:
+    node *root;
+    BT()
     {
-        if(root->left || root->right)
-        {
-            Node *temp = root->left;
-            root->left = root->right;
-            root->right = temp;
-        }
-        SwapNode(root->right);
-        SwapNode(root->left);
+        root=createTree(root);
     }
-}
 
-void recpostorder(Node *root)
-{
-    if(root == NULL)
-        return;
+    node* createTree(node *root)
+    {   
+        int data;
+        cout<<endl<<"Enter value of node (-1 for none): ";
+        cin>>data;
+        root=new node(data);
 
-    recpostorder(root->left);
-    recpostorder(root->right);
-    cout<<root->data<<" ";
-}
-
-void recpreorder(Node *root)
-{
-    if(root == NULL)
-        return;
-
-    cout<<root->data<<" ";
-    recpreorder(root->left);
-    recpreorder(root->right);
-}
-
-void recinorder(Node *root)
-{
-    if(root == NULL)
-        return;
-
-    recinorder(root->left);
-    cout<<root->data<<" ";
-    recinorder(root->right);
-}
-
-void iteinorder(Node *root)
-{
-    stack<Node*> s;
-    Node *curr = root;
-    while(!s.empty() or curr!=NULL)
-    {
-        if(curr!=NULL)
+        if(data==-1)
         {
-            s.push(curr);
-            curr = curr->left;
+            return NULL;
         }
 
-        curr = s.top();
-        s.pop();
-        cout<<curr->data<<" ";
+        cout<<endl<<"Enter left node value of "<<data;
+        root->left=createTree(root->left);
+        cout<<endl<<"Enter right node vale of "<<data;
+        root->right=createTree(root->right);
 
-        curr = curr->right;
+        return root;  
     }
-}
 
-void itepreorder(Node *root)
-{
-    stack<Node*> s;
-    Node *curr = root;
-    s.push(root);
-    while(!s.empty() or curr!=NULL)
+    void swapTree(node *root)
     {
-        Node *t = s.top();
-        s.pop();
-        cout<<t->data<<" ";
-        if(t->right)
-            s.push(t->right);
-        if(t->left)
-            s.push(t->left);
+        if(root)
+        {
+            if(root->left || root->right)
+            {
+                node *temp=root->left;
+                root->left=root->right;
+                root->right=temp;
+            }
+            swapTree(root->right);
+            swapTree(root->left);
+        }
     }
-}
 
-void itepostorder(Node *root)
-{
-    stack<Node*> s1, s2;
-    s1.push(root);
-    while(!s1.empty())
+    void inorder()
     {
-        Node *t = s1.top();
-        s1.pop();
-        s2.push(t);
-        if(t->left)
-            s1.push(t->left);
-        if(t->right)
-            s1.push(t->right);
+        stack<node*> s;
+        node* curr=root;
+        cout<<endl;
+        while(!s.empty() || curr!=nullptr)
+        {
+            while(curr!=nullptr)
+            {
+                s.push(curr);
+                curr=curr->left;
+            }
+
+            curr=s.top();
+            s.pop();
+            cout<<curr->data<<"  ";
+
+            curr=curr->right;
+        }
     }
-    while(!s2.empty())
+
+    void preorder()
     {
-        cout<<s2.top()->data<<" ";
-        s2.pop();
+        stack<node*> s;
+        node* curr=root;
+        s.push(curr);
+        cout<<endl;
+        while(!s.empty())       //IMP ONLY STACK CONDITION NOT CURR 
+        {
+            node* t=s.top();
+            cout<<t->data<<"  ";
+            s.pop();
+
+            if(t->right)
+            {
+                s.push(t->right);
+            }
+            if(t->left)
+            {
+                s.push(t->left);
+            }
+        }
     }
-}
 
-int findheight(Node* root)
-{
-    if(root == NULL) return 0;
+    void postorder()
+    {
+        stack<node*>s1,s2;
+        s1.push(root);
+        while(!s1.empty())
+        {
+            node *t=s1.top();
+            s1.pop();
+            s2.push(t); // IMP PUSH IN S2
 
-    int heightL = findheight(root->left);
-    int heightR = findheight(root->right);
+            if(t->left)
+            {
+                s1.push(t->left);   //IMP PUSH IN S1
+            }
+            if(t->right)
+            {
+                s1.push(t->right);
+            }
+        }
+        cout<<endl;
+        while(!s2.empty())
+        {
+            cout<<s2.top()->data<<"  ";
+            s2.pop();
+        }
+    }
 
-    return max(heightL,heightR)+1;
-}
+    int findHeight(node *root)
+    {
+        if(root==nullptr)
+        {
+            return 0;
+        }
+        else
+        {
+            int left=findHeight(root->left);
+            int right=findHeight(root->right);
 
+            return max(left,right)+1;
+        }
+    }
 
-int LeafCount(Node *root)
-{
-    if(root == NULL)
-        return 0;
-    else if(root->left == NULL and root->right == NULL)
-        return 1;
-    else
-        return LeafCount(root->right) + LeafCount(root->left);
-}
+    int leafCount(node *root)
+    {
+        if(root==nullptr) return 0;
 
-int InternalNodes(Node *root)
-{
-    if(root == NULL or (root->right == NULL and root->left == NULL))
-        return 0;
-    else return 1 + InternalNodes(root->left) + InternalNodes(root->right);
-}
+        else if(root->left==nullptr && root->right==nullptr)
+        {
+            return 1;
+        }
+        else 
+        {
+            return leafCount(root->left)+leafCount(root->right);
+        }
+    }
 
-void deleteAllNodes(Node* root)
-{
-    if (root == NULL) return;
+    int internalNodes(node *root)
+    {
+        if(root==nullptr || (root->left==nullptr && root->right==nullptr))
+        {
+            return 0;
+        }
+        else
+        {
+            return 1+internalNodes(root->left)+internalNodes(root->right);
+        }
+    }
 
-    deleteAllNodes(root->left);
-    deleteAllNodes(root->right);
+    void deleteTree(node *root)
+    {
+        if(root==nullptr)
+        {
+            return;
+        }
+        else
+        {
+            deleteTree(root->left);
+            deleteTree(root->right);
+            cout<<endl<<"deleting node: "<<root->data;
 
-    cout << "\n Deleting node: " << root->data;
-    delete root;
-}
+            delete root;
+        }
+    }
+
+    node* copy(node *root)
+    {
+        if(root==nullptr)
+        {
+            return nullptr;
+        }
+        else
+        {
+            node *root_copy=new node(root->data);
+
+            root_copy->left=copy(root_copy->left);
+            root_copy->right=copy(root_copy->right);
+
+            return root_copy;
+
+        }
+        
+    }
+};
 
 
 int main()
 {
-    char y='y';
-    int ch;
-    Node *root;
-    while(y=='y')
-    {
-        cout<<endl<<"MENU"<<endl;
-        cout<<"1.Create Tree";
-        cout<<endl<<"2.Inorder";
-        cout<<endl<<"3.Preorder";
-        cout<<endl<<"4.Postorder";
-        cout<<endl<<"5.Height of tree";
-        cout<<endl<<"6.Leaf count";
-        cout<<endl<<"7.Internal Nodes";
-        cout<<endl<<"8.Delete All Nodes";
-        cin>>ch;
-        switch(ch)
-        {
-            case 1:root=makeTree(root);break;
-            case 2:recinorder(root);break;
-            case 3:recpreorder(root);break;
-            case 4:recpostorder(root);break;
-            case 5:cout<<findheight(root);break;
-            case 6:cout<<LeafCount(root);break;
-            case 7:cout<<InternalNodes(root);break;
-            case 8:deleteAllNodes(root);break;
-            
-        }
+    BT b;
+    b.preorder();
+    b.inorder();
+    b.postorder();
+    return 0;
 
-    }
 }
