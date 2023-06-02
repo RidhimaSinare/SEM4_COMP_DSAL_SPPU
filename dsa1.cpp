@@ -1,47 +1,57 @@
 #include<iostream>
 using namespace std;
 
+
 class node
 {
-    int data;
-    node *left;
-    node *right;
-
-    public:
-    node(int d)
+    int key;
+    node *left,*right;
+public:
+    node()
     {
-        this->data=d;
-        this->right=nullptr;
-        this->left=nullptr;
+        key=0;
+        left=right=nullptr;
     }
-
+    node(int i)
+    {
+        key=i;
+        left=right=nullptr;
+    }
     friend class BST;
+
 };
 
 class BST
 {
     node *root;
-    public:
-        BST(int i)
-        {
-            this->root=new node(i);
-        }
+public:
+    BST()
+    {
+        root=nullptr;
+    }
 
-        node *getRoot()
-        {
-            return this->root;
-        }
+    node *getRoot()
+    {
+        return root;
+    }
 
-        void insert(int i)
+    void insert()
+    {   int key;
+        cout<<endl<<"Enter key to insert: ";cin>>key;
+        if(root==nullptr)
+        {
+            node *temp=new node(key);
+            root=temp;
+        }
+        else 
         {
             node *current=root;
-            node *previous=nullptr;
-
+            node *prev=nullptr;
 
             while(current!=nullptr)
             {
-                previous=current;
-                if(i<current->data)
+                prev=current;
+                if(current->key >key)
                 {
                     current=current->left;
                 }
@@ -49,141 +59,110 @@ class BST
                 {
                     current=current->right;
                 }
-            }
-            if(i<previous->data)
-            {
-                node *newNode=new node(i);
-                previous->left=newNode;
-            }
-            else
-            {
-                node *newNode=new node(i);
-                previous->right=newNode;
-            }
-        }
 
-        void displayInorder(node *Node)
-        {
-            if(Node==nullptr)
-            {
-                return;
             }
-            else
-            {
-                displayInorder(Node->left);
-                cout<<Node->data<<" ";
-                displayInorder(Node->right);
-            }
-        }
-
-        void displayPreorder(node *Node)
-        {
-            if(Node==nullptr)
-            {
-                return;
-            }
-            else
-            {
-                cout<<Node->data<<" ";
-                displayInorder(Node->left);
-                displayInorder(Node->right);
-            }
-        }
-
-        void displayPostorder(node *Node)
-        {
-            if(Node==nullptr)
-            {
-                return;
-            }
-            else
-            {
-                displayInorder(Node->left);
-                displayInorder(Node->right);
-                cout<<Node->data<<" ";
-            }
-        }
-
-        void search(int key)
-        {
-            node *current=root;
-            int level=0;
-            while(current!=nullptr)
-            {
-            if(current->data==key)
-            {
-                cout<<endl<<"Element Found";
-                cout<<endl<<"Level: "<<level<<endl;
-            }
-            else if(key<current->data)
-            {
-                current=current->left;
-                level++;
-            }
-            else
-            {
-                current=current->right;
-                level++;
-            }
-            }
-
-            if(current==nullptr)
-            {
-                cout<<endl<<"Element Not Found";
-            }
-        }
-
-        void minElement()
-        {
-            node *current=root;
-            while(current->left!=nullptr)
-            {
-                current=current->left;
-            }
-            cout<<endl<<"Minimum Element: "<<current->data;
-        }
-
-        void maxElement()
-        {
-            node *current=root;
-            while(current->right!=nullptr)
-            {
-                current=current->right;
-            }
-            cout<<endl<<"Maximum Element: "<<current->data;
-        }
-
-        int longestPath(node *root)
-        {
-            if(root==nullptr)
-                return -1;
-            int left=longestPath(root->left);
-            int right=longestPath(root->right);
-
-            return max(left,right)+1;
-        }
-
-        void swapNodes(node *root)
-        {
-            node *current=root;
-            node *temp;
             
-            if(current!=nullptr)
+            if(prev->key>key)
             {
-                temp=current->left;
-                current->left=current->right;
-                current->right=temp;
-            
-            swapNodes(current->left);
-            swapNodes(current->right);
+                node *temp=new node(key);
+                prev->left=temp;
             }
             else
-                return ;
+            {
+                node *temp=new node(key);
+                prev->right=temp;
+            }
+    }
+    }
 
+    void display(node *temp)    //inorder
+    {   
+        if(temp==nullptr)
+        {
+            return;
         }
+        else
+        {
+            display(temp->left);
+            cout<<temp->key<<"  ";
+            display(temp->right);
+        }
+    }
+
+    void search()
+    {   int key;
+        cout<<endl<<"Enter key to search: ";cin>>key;
+        
+        node *curr=root;
+        int level=0;
+        while(curr!=nullptr)
+        {
+            if(curr->key==key)
+            {
+                cout<<endl<<"Key found at level: "<<level;
+                break;
+            }
+            else if(curr->key<key)
+            {
+                curr=curr->right;level++;
+            }
+            else
+            {
+                curr=curr->left;level++;
+            }
+        }
+    }
+
+    int longestPath(node *temp)
+    {
+        
+        if(temp==nullptr)
+        {
+            return -1;
+        }
+        int left=longestPath(temp->left);
+        int right=longestPath(temp->right);
+
+        return max(left,right)+1;
+    }
+
+    void swapNodes(node *Node)
+    {
+        node* curr=Node;
+        node *temp;
+        if(curr!=nullptr)
+        {
+            temp=curr->left;
+            curr->left=curr->right;
+            curr->right=temp;
+        swapNodes(curr->left);
+        swapNodes(curr->right);
+        }
+        else{
+            return;
+        }
+    }
 };
+
+
+
 
 int main()
 {
-    return 0;
+    int ch;
+    BST b;
+    while(true)
+    {
+            cout<<endl<<"1.Insert\n2.Display\n3.Search\n4.Longest Path\n5.Swap"<<endl;
+            cout<<"Enter choice: ";cin>>ch;
+            switch(ch)
+            {
+                case 1: b.insert();break;
+                case 2: b.display(b.getRoot());break;
+                case 3: b.search();break;
+                case 4: cout<<"\nLongest Path: "<<b.longestPath(b.getRoot());
+                case 5: b.swapNodes(b.getRoot());break;
+                case 6:exit(0);
+            }
+    }
 }
