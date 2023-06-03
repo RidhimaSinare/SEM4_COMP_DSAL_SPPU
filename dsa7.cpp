@@ -1,61 +1,70 @@
 #include<iostream>
-#include<algorithm>
 #include<vector>
+#include<algorithm>
 using namespace std;
 
 class node
 {
-    char name;int cost;
+    char name;
+    int cost;
     node *next,*down;
-    public:
-    node(char charac,int data)
+public:
+    node()
     {
-        this->name=charac;
-        this->cost=data;
-        this->next=nullptr;
-        this->down=nullptr;
+
     }
+    node(char name,int cost)
+    {
+        this->name=name;
+        this->cost=cost;
+        next=down=nullptr;
+    }
+
     friend class Graph;
 };
 
+//edge class
 class Edge
-{   char v1,v2;
+{
+    char v1,v2;
     int weight;
-    public:
+public:
     Edge()
     {
 
     }
-    Edge(char v1, char v2,int w)
+    Edge(char v1,char v2,int w)
     {
         this->v1=v1;
         this->v2=v2;
         this->weight=w;
     }
-    friend class Graph;
 
+    friend class Graph;
 };
 
 class Graph
 {
     node *node1,*node2,*node3,*node4,*node5;
-    public:
-    Graph(){
-        this -> node1 = new node('A',0);
-        this -> node2 = new node('B',0);
-        this -> node3 = new node('C',0);
-        this -> node4 = new node('D',0);
-        this -> node5 = new node('E',0);
 
-        this -> node1 -> down = this -> node2;
-        this -> node2 -> down = this -> node3;
-        this -> node3 -> down = this -> node4;
-        this -> node4 -> down = this -> node5;
+public:
+    Graph()
+    {
+        node1=new node('A',0);
+        node2=new node('B',0);
+        node3=new node('C',0);
+        node4=new node('D',0);
+        node5=new node('E',0);
+
+        node1->down=node2;
+        node2->down=node3;
+        node3->down=node4;
+        node4->down=node5;
     }
 
-    void insert(char parentName,char adjacentName,int value)
+    void insert(char parentName,char adjname,int cost)
     {
-        node *parent=node1;
+        node*parent=node1;
         while(parent!=nullptr)
         {
             if(parent->name==parentName)
@@ -63,90 +72,97 @@ class Graph
                 break;
             }
             else
+            {
                 parent=parent->down;
-        }
+            }
+        }//got the parent node
 
         node *previous=nullptr;
         node *curr=parent;
-        node *newNode=new node(adjacentName,value);
+        node *newNode=new node(adjname,cost);
 
         while(curr!=nullptr)
         {
             previous=curr;
             curr=curr->next;
-        }
+        } //reached end of parent adjacency list to insert new item
+        //previous holds the last node in parents list
 
         previous->next=newNode;
-    }
+        cout<<endl<<"Insertion Successful";
+    }//end of INSERT
 
     void display()
     {
         node *parent=node1;
         while(parent!=nullptr)
-        {
-            node *curr=parent;
-            cout<<endl<<curr->name<<"  ";
-
-            curr=curr->next;   
+        {   
+            cout<<endl<<parent->name<<" : ";
+            node *curr=parent->next;
             while(curr!=nullptr)
             {
-                cout<<curr->name<<"  "<<curr->cost<<" - ";
+                cout<<curr->name<<("%d",curr->cost)<<" - ";
                 curr=curr->next;
             }
             cout<<"null";
 
             parent=parent->down;
         }
-    }
+    }//end of DISPLAY
 
     void primsAlgo(char initial)
     {
-        vector<char>visited;
-        int min_span_tree_cost=0;
+        vector<char> visited;
+        int mstc=0;
         visited.push_back(initial);
-        //while all nodes are visited
+        //size increases one by one and while end when it reaches 5 ie all nodes are visited
         while(visited.size()<5)
         {
             int min_cost=1000;
-            Edge mincostedge;
+            Edge minEdge;
             for(char visitedNode:visited)
-            {
+            {   
                 node *curr=node1;
                 while(curr!=nullptr)
                 {
                     if(curr->name==visitedNode)
                     {
-                        node *neighbor=curr->next;
-                        while(neighbor!=nullptr)
+                        node *neighbour=curr->next;
+                        while(neighbour!=nullptr)
                         {
-                            if(std::find(visited.begin(),visited.end(),neighbor->name)==visited.end())
+                            if(std::find(visited.begin(),visited.end(),neighbour->name)==visited.end())     //requires include algorithm
                             {
-                                //neighbor not visited
-                                if(neighbor->cost<min_cost)
+                                //neighbour not present in visited
+                                if(neighbour->cost<min_cost)
                                 {
-                                    mincostedge.v1=curr->name;
-                                    mincostedge.v2=neighbor->name;
-                                    mincostedge.weight=neighbor->cost;
-                                    min_cost=mincostedge.weight;
-
+                                    minEdge.v1=curr->name;
+                                    minEdge.v2=neighbour->name;
+                                    minEdge.weight=neighbour->cost;
+                                    min_cost=minEdge.weight;
                                 }
                             }
-                            neighbor=neighbor->next;
+                            neighbour=neighbour->next;
                         }
-                        break;
                     }
-                    curr=curr->down;
+                    break;
                 }
-            }//end of for loop
-            cout<<endl<<"Edge added: "<<mincostedge.v1<<" - "<<mincostedge.v2<<endl;
-            min_span_tree_cost+=mincostedge.weight;
-            visited.push_back(mincostedge.v2);
+                curr=curr->down;
+
+            }//end of for
+
+            cout<<endl<<"Edge added: "<<minEdge.v1<<"-"<<minEdge.v2<<" of cost : "<<minEdge.weight;
+            mstc+=minEdge.weight;
+            visited.push_back(minEdge.v2);
         }//end of main while
-        cout<<endl<<"Cost of spanning tree: "<<min_span_tree_cost;
-    }//end of prims
+
+        cout<<endl<<"Minimun Spanning Tree Cost is:  "<<mstc;
+
+    }//end of PRIMS
 
 
 };
+
+
 
 int main(){
     Graph g;
@@ -166,7 +182,8 @@ int main(){
     g.insert('E','C',5);
 
     g.display();
-    g.primsAlgo( 'A' ) ; 
+    g.primsAlgo('A');
+    
 
     return 0;
 }
